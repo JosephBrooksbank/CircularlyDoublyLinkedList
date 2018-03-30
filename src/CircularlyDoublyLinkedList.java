@@ -2,7 +2,6 @@
 public class CircularlyDoublyLinkedList<ValueType> {
     private int size;
     private Node cursor;
-    private Node head;
 
 
     public CircularlyDoublyLinkedList() {
@@ -15,49 +14,70 @@ public class CircularlyDoublyLinkedList<ValueType> {
         return (size == 0);
     }
 
+    /**
+     * Adds a value after the current cursor location
+     * @param value the value to add
+     */
     public void addAfterCursor(ValueType value){
-        if (cursor == null){
-            System.out.println("should be doing this once");
-            cursor = new Node(value);
-            head = cursor;
-        }
-        else if (cursor.getNext() == null){
-            System.out.println("doing this");
-            addBetween(value, cursor, head);
-        } else {
-            System.out.println("doing that");
-            addBetween(value, cursor, cursor.getNext());
-        }
+            Node newNode = new Node(value);
+            // Special case: list is empty
+            if (isEmpty()){
+                cursor = newNode;
+                size++;
+            // Special case: list has only one value (value added will be "final" loopback node)
+            } else if (cursor.getNext() == null){
+                addBetween(value, cursor, cursor);
+            // Base case
+            } else {
+                addBetween(value, cursor, cursor.getNext());
+            }
     }
 
+    /**
+     * Deletes current cursor, and moves to next in list for new cursor
+     * @return  The value of the deleted object
+     */
     public ValueType deleteCursor(){
-        if (cursor == null){
+        if (this.cursor == null){
             throw new IllegalStateException("Can't delete from an empty list");
         }
-        ValueType ret = cursor.getValue();
-        removeNode(cursor);
+        // Node to set cursor to after old cursor is deleted
+        Node next = this.cursor.getNext();
+        ValueType ret = removeNode(this.cursor);
+
+        this.cursor = next;
         return ret;
     }
 
+    /**
+     * Moves the cursor forward some amount of steps
+     * @param n The number of steps to move
+     */
     public void advanceCursor(int n) {
-        if (cursor == null){
-            throw new IllegalStateException("can't advance an empty list");
+        if (isEmpty()){
+            throw new IllegalStateException("Can't move forward in an empty list");
         }
         for (int i = 0; i < n; i++){
-            if (cursor.getNext() == null){
-                cursor = head;
-            } else {
-                cursor = cursor.getNext();
-            }
+            this.cursor = this.cursor.getNext();
         }
     }
 
+    /**
+     * @return  The value of the current location
+     */
     public ValueType getValue(){
+        if (cursor == null){
+            throw new IllegalStateException("Can't get value from empty list");
+        }
         return cursor.getValue();
     }
 
-
-
+    /**
+     * Adds a new node between two already created nodes
+     * @param value The value to add
+     * @param pred  The previous node
+     * @param succ  The successor node
+     */
     private void addBetween(ValueType value, Node pred, Node succ) {
         Node newNode = new Node(value);
 
@@ -73,6 +93,11 @@ public class CircularlyDoublyLinkedList<ValueType> {
 
     }
 
+    /**
+     * Removes a node
+     * @param node  The node to remove
+     * @return  The value of the removed node
+     */
     private ValueType removeNode(Node node) {
         // Saving value
         ValueType ret = node.getValue();
@@ -87,19 +112,20 @@ public class CircularlyDoublyLinkedList<ValueType> {
         return ret;
     }
 
-
+    /**
+     * @return The values of the list as a String
+     */
     public String toString(){
         StringBuilder sb = new  StringBuilder();
 
         sb.append("(size = ").append(size).append(")");
         for (int i = 0; i < size; i++){
             sb.append(" ").append(cursor.getValue());
-            this.advanceCursor(i);
+            this.advanceCursor(1);
         }
 
         return sb.toString();
     }
-
 
     /**
      * Node class for each data node
